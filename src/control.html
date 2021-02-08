@@ -69,7 +69,13 @@
                 <button class="button" id="open-mediadir">Open Media Folder</button>
             </div>
             <div class="tab-content media" style="display: none;">
-                <button class="button" id="download-media">Start Download</button>
+                <button class="button" id="download-media" style="margin-bottom: 20px;">Start Download</button>
+                <div class="checkbox-group" style="margin-bottom: 20px;">
+                    <input id="uselist" type="checkbox">
+                    <label for="uselist">Only download media from the listed accounts</label>
+                </div>
+                <div id="userlist"></div>
+                <input id="add-userlist" type="text" class="form-control" placeholder="@username">
             </div>
         </main>
 

@@ -22,14 +22,15 @@ const electrondl = require('electron-dl');
 
 // First run
 const firstRun = require('electron-first-run');
-const devtoolsExtensionNotice = firstRun({name: 'devtools-extension-notice'});
+const devtoolsExtensionNotice = firstRun({ name: 'devtools-extension-notice' });
 
 // Process
 const process = require('process');
 
 // Prepare Save File
-if (store.get('version') == undefined || store.get('saves') == undefined) {
+if (store.get('version') == undefined || store.get('saves') == undefined || store.get('medialist') == undefined) {
     store.set('version', 0);
+    store.set('medialist', { uselist: false, userlist: [] });
     store.set('saves', {});
 }
 
@@ -44,15 +45,6 @@ if (!fs.existsSync(mediadir)) fs.mkdirSync(mediadir);
 if (require('electron-squirrel-startup')) {
     app.quit();
 }
-
-// Loop count
-Object.size = function (obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
-};
 
 // Server ------------------------------------------------------------------------------------------------
 
@@ -99,7 +91,7 @@ server.use("/", router);
 const host = 'localhost';
 const port = 3727;
 
-server.listen(port, host, () => {});
+server.listen(port, host, () => { });
 
 const createWindow = () => {
 
@@ -118,6 +110,8 @@ const createWindow = () => {
                 shell.openPath(mediadir);
             }
         });
+
+        var medialist = store.get('medialist');
 
         var saves = store.get('saves');
         var tweets = saves.tweets;
@@ -140,6 +134,10 @@ const createWindow = () => {
             if (this_tweet.retweeted_status_id_str !== undefined) {
                 this_tweet_id = this_tweet.retweeted_status_id_str;
                 this_tweet_author_username = /RT @([a-zA-Z0-9_]{1,15}):[\s\S]*/gi.exec(this_tweet.full_text)[1];
+            }
+
+            if (medialist.uselist) {
+                if (!medialist.userlist.includes(this_tweet_author_username.toLowerCase())) continue;
             }
 
             if (this_tweet.entities.media === undefined) continue;
@@ -166,7 +164,7 @@ const createWindow = () => {
                     var video_info = this_tweet.extended_entities.media[0].video_info;
                     var variant = 0;
 
-                    if (Object.size(video_info.variants) > 1) {
+                    if (video_info.variants.length > 1) {
 
                         var biggest_res_variant = { key: 0, res: 0 };
 
@@ -195,7 +193,7 @@ const createWindow = () => {
                 if (this_tweet_media_url === undefined) continue;
 
                 var this_tweet_media_url_pathname = new URL(this_tweet_media_url).pathname;
-                var this_tweet_media_name = this_tweet_id + '-' + mediakey + '.' + this_tweet_media_url_pathname.split('.')[Object.size(this_tweet_media_url_pathname.split('.')) - 1];
+                var this_tweet_media_name = this_tweet_id + '-' + mediakey + '.' + this_tweet_media_url_pathname.split('.')[this_tweet_media_url_pathname.split('.').length - 1];
 
                 if (fs.existsSync(path.join(this_tweet_author_dir, this_tweet_media_name))) continue;
 
@@ -281,20 +279,20 @@ const createWindow = () => {
         app.quit();
     });
 
-    ipcMain.on('open-href', (event, arg) => {
+    ipcMain.on('open-href', (event, msg) => {
 
         try {
-            var urlobj = new URL(arg);
+            var urlobj = new URL(msg);
 
             if (urlobj.hostname == 'twitter.com' || urlobj.hostname.endsWith('.twitter.com') && urlobj.hostname !== '.twitter.com') {
 
-                mainWindow.loadURL(arg);
+                mainWindow.loadURL(msg);
 
             } else {
                 dialog.showMessageBox({
                     type: "error",
                     message: "Refused to load this domain",
-                    detail: arg,
+                    detail: msg,
                     buttons: ["Close"],
                     cancelId: 0
                 }).then((response) => { });
@@ -310,6 +308,39 @@ const createWindow = () => {
         event.reply('reply-mediadir', mediadir);
     });
 
+    ipcMain.on('get-medialist', (event) => {
+        event.reply('reply-medialist', store.get('medialist'));
+    });
+
+    ipcMain.on('toggle-uselist', (event) => {
+        var now = store.get('medialist.uselist');
+
+        if (now) {
+            store.set('medialist.uselist', false);
+        } else {
+            store.set('medialist.uselist', true);
+        }
+    });
+
+    ipcMain.on('add-userlist', (event, msg) => {
+        msg = msg.toLowerCase();
+        if (msg.length <= 15) {
+            var list = store.get('medialist.userlist');
+            list.indexOf(msg) === -1 ? list.push(msg) : "";
+            store.set('medialist.userlist', list);
+        }
+    });
+
+    ipcMain.on('remove-userlist', (event, msg) => {
+        var list = store.get('medialist.userlist');
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] == msg) {
+                list.splice(i, 1);
+            }
+        }
+        store.set('medialist.userlist', list);
+    });
+
     // Devtools Extension Notice -------------------------------------------------------------------------
 
     if (devtoolsExtensionNotice) {
@@ -319,7 +350,7 @@ const createWindow = () => {
             detail: `Thank you for installing ${app.getName()}. If a message saying 'Gateway Extension Loaded' does not appear on the devTools Console you may have to restart the app or close and reopen devTools.`,
             buttons: ["Close"],
             cancelId: 0
-        }).then((response) => {});
+        }).then((response) => { });
     }
 };
 

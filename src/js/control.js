@@ -4,7 +4,7 @@ const $ = require('jquery');
 
 // Only Windows
 if (os.platform() === "win32") {
-    $("head").append('<link rel="stylesheet" href="css/win.css"></link>');
+    $("head").append('<link rel="stylesheet" href="css/win.css">');
 }
 
 // Tab switch
@@ -23,37 +23,32 @@ $('.send-href').click(function () {
     ipcRenderer.send('open-href', $(this).attr('data-href'));
 });
 
-$('#direct').keyup(function(e){
-    if (e.keyCode == 13){
+$('#direct').keyup(function (e) {
+    if (e.keyCode == 13) {
         ipcRenderer.send('open-href', $(this).val());
     }
 });
 
 
-// Get the save file directory
+// Directory
 var savesdir, mediadir;
 
-ipcRenderer.on('reply-savesdir', (event, arg) => {
-    savesdir = arg;
+ipcRenderer.on('reply-savesdir', (event, reply) => {
+    savesdir = reply;
 
-    // Show directory path
     $('#savesdir').html(savesdir).attr('title', savesdir);
 
-    // Open directory on click
     $('#open-savesdir').click(function () {
         shell.openPath(savesdir);
     });
 })
 ipcRenderer.send('get-savesdir');
 
-// Get the media directory
-ipcRenderer.on('reply-mediadir', (event, arg) => {
-    mediadir = arg;
+ipcRenderer.on('reply-mediadir', (event, reply) => {
+    mediadir = reply;
 
-    // Show directory path
     $('#mediadir').html(mediadir).attr('title', mediadir);
 
-    // Open directory on click
     $('#open-mediadir').click(function () {
         shell.openPath(mediadir);
     });
@@ -61,8 +56,35 @@ ipcRenderer.on('reply-mediadir', (event, arg) => {
 ipcRenderer.send('get-mediadir');
 
 
-// Download
-
-$('#download-media').click(function() {
+// Media
+$('#download-media').click(function () {
     ipcRenderer.send('media');
 })
+
+ipcRenderer.on('reply-medialist', (event, reply) => {
+
+    $('#uselist').prop('checked', reply.uselist);
+
+    var html = "";
+    $.each(reply.userlist, function (index, value) {
+        html = html.concat(`<button class="user" data-username="${value}">${value}</button>`);
+    });
+    $("#userlist").html(html);
+    $("#userlist .user").click(function(){
+        ipcRenderer.send('remove-userlist', $(this).attr('data-username'));
+        ipcRenderer.send('get-medialist');
+    })
+})
+ipcRenderer.send('get-medialist');
+
+$('#uselist').change(function(){
+    ipcRenderer.send('toggle-uselist');
+});
+
+$('#add-userlist').keyup(function (e) {
+    if (e.keyCode == 13) {
+        ipcRenderer.send('add-userlist', $(this).val());
+        $(this).val("");
+        ipcRenderer.send('get-medialist');
+    }
+});
