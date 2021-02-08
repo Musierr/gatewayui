@@ -72,6 +72,12 @@ server.post('/port', (request, response) => {
         var jsonparsed = JSON.parse(request.body.json).globalObjects;
         var jsonstored = store.get('saves');
 
+        if (jsonparsed.tweets !== undefined && jsonstored.tweets !== undefined) {
+            for (var this_stored_key in jsonstored.tweets) {
+                if (jsonparsed.tweets[this_stored_key] !== undefined) delete jsonparsed.tweets[this_stored_key];
+            }
+        }
+
         store.set('saves', merge.merge(jsonparsed, jsonstored));
 
         var vcount = store.get('version');
