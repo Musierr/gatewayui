@@ -1,0 +1,54 @@
+{
+    "name": "gatewayui",
+    "productName": "gatewayui",
+    "version": "1.0.0",
+    "description": "Tweet downloader for macOS and Windows. Without API keys.",
+    "main": "index.js",
+    "scripts": {
+        "start": "ELECTRON_ENV=development electron-forge start",
+        "pack": "electron-builder --dir",
+        "dist": "electron-builder",
+        "build": "sass ./src/css/ --style compressed"
+    },
+    "keywords": [],
+    "author": {
+        "name": "Vulpes-fox",
+        "url": "https://github.com/Vulpes-fox"
+    },
+    "license": "MIT",
+    "build": {
+        "appId": "vulpes-fox.gatewayui",
+        "productName": "gatewayui",
+        "extraResources": [
+            "./gatewayext/**"
+        ],
+        "mac": {
+            "category": "public.app-category.utilities",
+            "identity": null,
+            "target": "dmg"
+        },
+        "win": {
+            "target": "portable"
+        }
+    },
+    "dependencies": {
+        "body-parser": "^1.19.0",
+        "electron-dl": "^3.0.2",
+        "electron-first-run": "^3.0.0",
+        "electron-squirrel-startup": "^1.0.0",
+        "electron-store": "^6.0.0",
+        "express": "^4.17.1",
+        "jquery": "^3.5.1",
+        "merge-json": "0.1.0-b.3"
+    },
+    "devDependencies": {
+        "@electron-forge/cli": "6.0.0-beta.52",
+        "@electron-forge/maker-deb": "6.0.0-beta.52",
+        "@electron-forge/maker-rpm": "6.0.0-beta.52",
+        "@electron-forge/maker-squirrel": "6.0.0-beta.52",
+        "@electron-forge/maker-zip": "6.0.0-beta.52",
+        "electron": "9.2.0",
+        "electron-builder": "^22.8.0",
+        "sass": "^1.32.6"
+    }
+}

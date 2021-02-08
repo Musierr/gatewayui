@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Control</title>
+
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self'; style-src 'unsafe-inline' 'self'">
+
+        <link rel="stylesheet" href="css/styles.css">
+    </head>
+    <body>
+        <header></header>
+        <main class="control">
+            <nav class="tabs">
+                <ul>
+                    <li>
+                        <button class="tab" data-show-class="shortcuts" data-active="true">
+                            <span>Shortcuts</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="tab" data-show-class="directory" data-active="false">
+                            <span>Directory</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="tab" data-show-class="media" data-active="false">
+                            <span>Media</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+            <nav class="tab-content shortcuts">
+                <ul>
+                    <li>
+                        <button class="send-href" data-href="https://twitter.com">
+                            <svg viewBox="0 0 24 24"><g><path d="M22.58 7.35L12.475 1.897c-.297-.16-.654-.16-.95 0L1.425 7.35c-.486.264-.667.87-.405 1.356.18.335.525.525.88.525.16 0 .324-.038.475-.12l.734-.396 1.59 11.25c.216 1.214 1.31 2.062 2.66 2.062h9.282c1.35 0 2.444-.848 2.662-2.088l1.588-11.225.737.398c.485.263 1.092.082 1.354-.404.263-.486.08-1.093-.404-1.355zM12 15.435c-1.795 0-3.25-1.455-3.25-3.25s1.455-3.25 3.25-3.25 3.25 1.455 3.25 3.25-1.455 3.25-3.25 3.25z"></path></g></svg>
+                            <span>Home</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="send-href" data-href="https://twitter.com/search">
+                            <svg viewBox="0 0 24 24"><g><path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path></g></svg>
+                            <span>Search</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="send-href" data-href="https://twitter.com/i/display">
+                            <svg viewBox="0 0 24 24"><g><path d="M15.692 11.205l6.383-7.216c.45-.45.45-1.18 0-1.628-.45-.45-1.178-.45-1.627 0l-7.232 6.402s.782.106 1.595.93c.548.558.882 1.51.882 1.51z"></path><path d="M17.45 22.28H3.673c-1.148 0-2.083-.946-2.083-2.11V7.926c0-1.165.934-2.112 2.082-2.112h5.836c.414 0 .75.336.75.75s-.336.75-.75.75H3.672c-.32 0-.583.274-.583.612V20.17c0 .336.26.61.582.61h13.78c.32 0 .583-.273.583-.61v-6.28c0-.415.336-.75.75-.75s.75.335.75.75v6.28c0 1.163-.934 2.11-2.084 2.11z"></path></g><g><path d="M8.18 16.99c-.19.154-.476.032-.504-.21-.137-1.214-.234-4.053 1.483-5.943.908-1 3.02-1.52 4.475-.198s1.14 3.473.23 4.473c-2.07 2.15-3.428.058-5.686 1.878z"></path></g></svg>
+                            <span>Display</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="send-href" data-href="https://twitter.com/logout">
+                            <svg style="height: 16px; margin: 0px 2px;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M255.15,468.625H63.787c-11.737,0-21.262-9.526-21.262-21.262V64.638c0-11.737,9.526-21.262,21.262-21.262H255.15 c11.758,0,21.262-9.504,21.262-21.262S266.908,0.85,255.15,0.85H63.787C28.619,0.85,0,29.47,0,64.638v382.724 c0,35.168,28.619,63.787,63.787,63.787H255.15c11.758,0,21.262-9.504,21.262-21.262 C276.412,478.129,266.908,468.625,255.15,468.625z"/><path d="M505.664,240.861L376.388,113.286c-8.335-8.25-21.815-8.143-30.065,0.213s-8.165,21.815,0.213,30.065l92.385,91.173 H191.362c-11.758,0-21.262,9.504-21.262,21.262c0,11.758,9.504,21.263,21.262,21.263h247.559l-92.385,91.173 c-8.377,8.25-8.441,21.709-0.213,30.065c4.167,4.21,9.653,6.336,15.139,6.336c5.401,0,10.801-2.041,14.926-6.124l129.276-127.575 c4.04-3.997,6.336-9.441,6.336-15.139C512,250.302,509.725,244.88,505.664,240.861z"/></svg>
+                            <span>Logout</span>
+                        </button>
+                    </li>
+                    <li>
+                        <input id="direct" type="url" class="form-control" placeholder="https://twitter.com/">
+                    </li>
+                </ul>
+            </nav>
+            <div class="tab-content directory" style="display: none;">
+                <code id="savesdir"></code>
+                <button class="button" id="open-savesdir" style="margin-bottom: 30px;">Open Save File</button>
+                <code id="mediadir"></code>
+                <button class="button" id="open-mediadir">Open Media Folder</button>
+            </div>
+            <div class="tab-content media" style="display: none;">
+                <button class="button" id="download-media">Start Download</button>
+            </div>
+        </main>
+
+        <script type="text/javascript" src="js/control.js"></script>
+    </body>
+</html>
