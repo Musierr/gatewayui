@@ -23,6 +23,10 @@ $('.send-href').click(function () {
     ipcRenderer.send('open-href', $(this).attr('data-href'));
 });
 
+$('.send-toggle-auto-scroll').click(function () {
+    ipcRenderer.send('toggle-auto-scroll', '');
+});
+
 $('#direct').keyup(function (e) {
     if (e.keyCode == 13) {
         ipcRenderer.send('open-href', $(this).val());

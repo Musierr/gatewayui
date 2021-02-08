@@ -1,0 +1,15 @@
+{
+    "name": "Auto-scroll",
+    "description": "Automatic scrolling for gatewayui",
+    "version": "0.1",
+    "permissions": [
+        "<all_urls>"
+    ],
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["scripts/content.js"]
+        }
+    ],
+    "manifest_version": 2
+}

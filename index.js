@@ -20,12 +20,12 @@ const fs = require('fs');
 // Electron File Download
 const electrondl = require('electron-dl');
 
-// First run
-const firstRun = require('electron-first-run');
-const devtoolsExtensionNotice = firstRun({ name: 'devtools-extension-notice' });
-
 // Process
 const process = require('process');
+
+// Extension location
+const isDev = require('electron-is-dev');
+const extension_dirname = !isDev ? `${process.resourcesPath}` : __dirname;
 
 // Prepare Save File
 if (store.get('version') == undefined || store.get('saves') == undefined || store.get('medialist') == undefined) {
@@ -40,11 +40,6 @@ const mediadir = path.join(app.getPath('userData'), 'media');
 
 // Create Mediadir if not exists
 if (!fs.existsSync(mediadir)) fs.mkdirSync(mediadir);
-
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) {
-    app.quit();
-}
 
 // Server ------------------------------------------------------------------------------------------------
 
@@ -227,6 +222,8 @@ const createWindow = () => {
         fullscreenable: false,
         maximizable: false,
 
+        show: false,
+
         webPreferences: {
             devTools: true,
             nodeIntegration: false,
@@ -235,24 +232,23 @@ const createWindow = () => {
     });
     mainWindow.loadURL('https://twitter.com');
 
-    mainWindow.webContents.on('devtools-closed', () => {
-        dialog.showMessageBox({
-            type: "warning",
-            message: "Do not close DevTools!",
-            detail: "DevTools must be open in order to work. To reopen devTools press 'Ctrl+Shift+I' or 'F12' on Windows or 'Cmd+Alt+I' on Mac OS",
-            buttons: ["Close"],
-            cancelId: 0
-        }).then((response) => { });
+    mainWindow.webContents.session.loadExtension(path.join(extension_dirname, 'gatewayext')).then(({ id }) => {});
+
+    const mainWindowDevTools = new BrowserWindow({
+        show: false,
+        title: 'Gateway extension loader'
+    });
+    mainWindowDevTools.setMenuBarVisibility(false);
+    mainWindow.webContents.setDevToolsWebContents(mainWindowDevTools.webContents);
+
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.show();
+        mainWindow.webContents.openDevTools({ mode: 'detach' });
     });
 
     mainWindow.on('close', function () {
         app.quit();
     });
-
-    var extension_dirname = process.env.ELECTRON_ENV !== 'development' ? `${process.resourcesPath}` : __dirname;
-    session.defaultSession.loadExtension(path.join(extension_dirname, 'gatewayext')).then(({ id }) => {
-        mainWindow.webContents.openDevTools();
-    })
 
     // Controller Window ---------------------------------------------------------------------------------
 
@@ -266,6 +262,8 @@ const createWindow = () => {
         fullscreenable: false,
         maximizable: false,
 
+        show: false,
+
         webPreferences: {
             devTools: false,
             nodeIntegration: true,
@@ -274,6 +272,17 @@ const createWindow = () => {
     });
     controlWindow.setMenuBarVisibility(false);
     controlWindow.loadFile(path.join(__dirname, 'src/control.html'));
+
+    var mainWindowStartingBounds = mainWindow.getBounds();
+    var controlWindowStartingBounds = controlWindow.getBounds();
+    controlWindow.setBounds({
+        x: (mainWindowStartingBounds.x - controlWindowStartingBounds.width),
+        y: mainWindowStartingBounds.y
+    });
+
+    controlWindow.once('ready-to-show', () => {
+        controlWindow.show();
+    });
 
     controlWindow.on('close', function () {
         app.quit();
@@ -298,6 +307,23 @@ const createWindow = () => {
                 }).then((response) => { });
             }
         } catch (e) { }
+    });
+
+    var autoscroll = false;
+    var autoscrollid = null;
+    ipcMain.on('toggle-auto-scroll', (event, msg) => {
+        if (!autoscroll) {
+            mainWindow.webContents.session.loadExtension(path.join(extension_dirname, 'scrollext')).then(({ id }) => {
+                autoscroll = true;
+                autoscrollid = id;
+                mainWindow.reload();
+            });
+        } else {
+            mainWindow.webContents.session.removeExtension(autoscrollid);
+            autoscroll = false;
+            autoscrollid = null;
+            mainWindow.reload();
+        }
     });
 
     ipcMain.on('get-savesdir', (event) => {
@@ -340,18 +366,6 @@ const createWindow = () => {
         }
         store.set('medialist.userlist', list);
     });
-
-    // Devtools Extension Notice -------------------------------------------------------------------------
-
-    if (devtoolsExtensionNotice) {
-        dialog.showMessageBox({
-            type: "info",
-            message: "Welcome!",
-            detail: `Thank you for installing ${app.getName()}. If a message saying 'Gateway Extension Loaded' does not appear on the devTools Console you may have to restart the app or close and reopen devTools.`,
-            buttons: ["Close"],
-            cancelId: 0
-        }).then((response) => { });
-    }
 };
 
 // Electron App Events -----------------------------------------------------------------------------------

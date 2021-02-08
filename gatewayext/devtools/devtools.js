@@ -19,14 +19,9 @@ chrome.devtools.network.onRequestFinished.addListener(function (request) {
 
                 chrome.devtools.inspectedWindow.eval('console.log(JSON.parse(unescape("' + escape(content) + '")))');
 
-                chrome.runtime.sendMessage({json: content}, function(response) {
-                    chrome.devtools.inspectedWindow.eval('console.log(unescape("' + escape(response.response) + '"))');
-                });
+                chrome.runtime.sendMessage({json: content}, function(response) {});
             }
 
-        } catch (e) {
-            
-            chrome.devtools.inspectedWindow.eval('console.log("Skipped")');
-        }
+        } catch (e) {}
     })
 });
