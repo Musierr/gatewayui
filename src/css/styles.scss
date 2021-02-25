@@ -34,7 +34,7 @@ header {
     right: 0px;
     height: var(--header-height);
 
-    background-color: black;
+    background-color: var(--header-background-color);
 }
 
 main {
@@ -50,8 +50,8 @@ main {
     min-height: 100vh;
     padding: var(--header-height) 0px 0px 0px;
 
-    background-color: black;
-    color: rgb(217, 217, 217);
+    background-color: var(--background-color);
+    color: var(--color);
 
     h1 {
         margin-top: 20px;
@@ -67,7 +67,7 @@ main {
     .tabs {
         width: 100%;
         position: fixed;
-        background-color: black;
+        background-color: var(--tab-background-color);
         z-index: 99999;
 
         ul {
@@ -136,7 +136,8 @@ main {
 
                 button {
                     appearance: none;
-                    background-color: transparent;
+                    background-color: var(--shortcut-background-color);
+                    color: var(--shortcut-color);
                     border: 0px solid transparent;
                     cursor: pointer;
 
@@ -149,11 +150,10 @@ main {
                     align-items: center;
 
                     border-radius: 9999px;
-                    color: inherit;
 
                     &:hover {
-                        background-color: #1da1f21a;
-                        color: #1da1f2;
+                        background-color: var(--shortcut-hover-background-color);
+                        color: var(--shortcut-hover-color);
                     }
 
                     svg {
@@ -226,7 +226,7 @@ main {
             .user {
                 appearance: none;
                 background-color: transparent;
-                color: white;
+                color: var(--userlist-color);
                 border: 0px solid transparent;
                 padding: 20px;
                 text-align: center;
@@ -235,7 +235,7 @@ main {
 
                 &:hover {
                     cursor: pointer;
-                    color: black;
+                    color: var(--userlist-hide-color);
 
                     &::before {
                         position: absolute;
@@ -248,7 +248,7 @@ main {
                         align-items: center;
                         justify-content: center;
 
-                        color: white;
+                        color: var(--userlist-hover-color);
                         background-color: rgba(255, 0, 0, 0.2);
                         border-radius: 10px;
 
@@ -279,10 +279,10 @@ main {
     line-height: 1.5;
     border-radius: 0.2rem;
 
-    color: white;
-    background-color: #2c2f33;
+    color: var(--form-color);
+    background-color: var(--form-background-color);
     background-clip: padding-box;
-    border: 1px solid #23272a;
+    border: 1px solid var(--form-border-color);
 
     &:focus {
         outline: 0;
@@ -291,8 +291,8 @@ main {
 
 .button {
     appearance: none;
-    background-color: #1da1f2;
-    color: white;
+    background-color: var(--button-background-color);
+    color: var(--button-color);
     border: 0px solid transparent;
     cursor: pointer;
 
@@ -306,14 +306,5 @@ main {
 
     &:hover {
         background-color: #1a91da;
-    }
-
-    &.button-green {
-        background-color: #28a745;
-        border-color: #28a745;
-
-        &:hover {
-            background-color: #218838;
-        }
     }
 }

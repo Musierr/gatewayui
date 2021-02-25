@@ -1,4 +1,4 @@
-const { shell, ipcRenderer } = require('electron');
+const { shell, ipcRenderer, remote } = require('electron');
 const os = require('os');
 const $ = require('jquery');
 
@@ -6,6 +6,19 @@ const $ = require('jquery');
 if (os.platform() === "win32") {
     $("head").append('<link rel="stylesheet" href="css/win.css">');
 }
+
+// Themes
+ipcRenderer.on('update-theme', function (e, theme) {
+  if (theme == 'light') {
+    $('html').attr('class', 'light');
+  } else if (theme == 'dark') {
+    $('html').attr('class', 'dark');
+  }
+});
+
+$('.send-toggle-app-theme').click(function () {
+    ipcRenderer.send('toggle-app-theme', '');
+});
 
 // Tab switch
 $('.tab').click(function () {

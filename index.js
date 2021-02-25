@@ -1,6 +1,7 @@
 // Electron
 const { app, BrowserWindow, session, dialog, ipcMain, shell } = require('electron');
 const path = require('path');
+const util = require('util');
 
 // Express
 const express = require('express');
@@ -28,10 +29,22 @@ const isDev = require('electron-is-dev');
 const extension_dirname = !isDev ? `${process.resourcesPath}` : __dirname;
 
 // Prepare Save File
-if (store.get('version') == undefined || store.get('saves') == undefined || store.get('medialist') == undefined) {
+if (store.get('version') == undefined || store.get('theme') == undefined || store.get('saves') == undefined || store.get('medialist') == undefined) {
     store.set('version', 0);
-    store.set('medialist', { uselist: false, userlist: [] });
+    store.set('theme', 'light');
+    store.set('medialist', { uselist: false, userlist: {} });
     store.set('saves', {});
+}
+
+// Array to object (Updated how the Userlist is stored)
+if (util.isArray(store.get('medialist.userlist'))) {
+    var users = store.get('medialist.userlist');
+    var object = {};
+    for (user in users) {
+        object[users[user]] = users[user];
+    }
+    store.delete('medialist.userlist');
+    store.set('medialist.userlist', object);
 }
 
 // Directory Constants
@@ -132,7 +145,7 @@ const createWindow = () => {
             }
 
             if (medialist.uselist) {
-                if (!medialist.userlist.includes(this_tweet_author_username.toLowerCase())) continue;
+                if (medialist.userlist[this_tweet_author_username.toLowerCase()] === undefined) continue;
             }
 
             if (this_tweet.entities.media === undefined) continue;
@@ -282,6 +295,7 @@ const createWindow = () => {
 
     controlWindow.once('ready-to-show', () => {
         controlWindow.show();
+        controlWindow.webContents.send('update-theme', store.get('theme'));
     });
 
     controlWindow.on('close', function () {
@@ -307,6 +321,16 @@ const createWindow = () => {
                 }).then((response) => { });
             }
         } catch (e) { }
+    });
+
+    ipcMain.on('toggle-app-theme', (event, msg) => {
+        if (store.get('theme') == 'light') {
+            store.set('theme', 'dark');
+            controlWindow.webContents.send('update-theme', store.get('theme'));
+        } else if (store.get('theme') == 'dark') {
+            store.set('theme', 'light');
+            controlWindow.webContents.send('update-theme', store.get('theme'));
+        }
     });
 
     var autoscroll = false;
@@ -349,21 +373,16 @@ const createWindow = () => {
     });
 
     ipcMain.on('add-userlist', (event, msg) => {
-        msg = msg.toLowerCase();
         if (msg.length <= 15) {
             var list = store.get('medialist.userlist');
-            list.indexOf(msg) === -1 ? list.push(msg) : "";
+            list[msg.toLowerCase()] = msg;
             store.set('medialist.userlist', list);
         }
     });
 
     ipcMain.on('remove-userlist', (event, msg) => {
         var list = store.get('medialist.userlist');
-        for (var i = 0; i < list.length; i++) {
-            if (list[i] == msg) {
-                list.splice(i, 1);
-            }
-        }
+        delete list[msg.toLowerCase()];
         store.set('medialist.userlist', list);
     });
 };

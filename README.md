@@ -1,5 +1,11 @@
 # gatewayui
-Tweet downloader for macOS and Windows. Without API keys.
+Tweet downloader for macOS and Windows. Without API keys.<br>
+
+![Interface](/images/interface.png)
+
+The application opens a browser in which you can navigate twitter, any tweet you see will be stored.<br>
+You can login into your twitter account to retrieve private profiles, lists, etc.
+Twitter won't be able to tell if you're in a normal browser or in the application.
 
 ## Building
 ![Build/release](https://github.com/Vulpes-fox/gatewayui/workflows/Build/release/badge.svg)<br>
