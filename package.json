@@ -1,7 +1,7 @@
 {
     "name": "gatewayui",
     "productName": "gatewayui",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Tweet downloader for macOS and Windows. Without API keys.",
     "main": "index.js",
     "scripts": {
