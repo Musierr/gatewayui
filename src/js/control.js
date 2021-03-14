@@ -81,6 +81,8 @@ $('#download-media').click(function () {
 ipcRenderer.on('reply-medialist', (event, reply) => {
 
     $('#uselist').prop('checked', reply.uselist);
+    $('#bypass_on_retweet').prop('checked', reply.bypass_on_retweet);
+    $('#bypass_on_like').prop('checked', reply.bypass_on_like);
 
     var html = "";
     $.each(reply.userlist, function (index, value) {
@@ -96,6 +98,14 @@ ipcRenderer.send('get-medialist');
 
 $('#uselist').change(function(){
     ipcRenderer.send('toggle-uselist');
+});
+
+$('#bypass_on_retweet').change(function(){
+    ipcRenderer.send('toggle-bypass_on_retweet');
+});
+
+$('#bypass_on_like').change(function(){
+    ipcRenderer.send('toggle-bypass_on_like');
 });
 
 $('#add-userlist').keyup(function (e) {

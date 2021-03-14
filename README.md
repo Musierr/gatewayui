@@ -36,3 +36,5 @@ npm run build
 ```
 yarn dist
 ```
+
+The application should have been built on the folder `dist`

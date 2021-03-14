@@ -78,7 +78,7 @@
                         </button>
                     </li>
                     <li>
-                        <input id="direct" type="url" class="form-control" placeholder="https://twitter.com/">
+                        <input id="direct" type="url" class="form-control" value="https://twitter.com/" placeholder="https://twitter.com/">
                     </li>
                 </ul>
             </nav>
@@ -93,6 +93,14 @@
                 <div class="checkbox-group" style="margin-bottom: 20px;">
                     <input id="uselist" type="checkbox">
                     <label for="uselist">Only download media from the listed accounts</label>
+                </div>
+                <div class="checkbox-group" style="margin-bottom: 20px;">
+                    <input id="bypass_on_retweet" type="checkbox">
+                    <label for="bypass_on_retweet">Bypass this setting on retweets</label>
+                </div>
+                <div class="checkbox-group" style="margin-bottom: 20px;">
+                    <input id="bypass_on_like" type="checkbox">
+                    <label for="bypass_on_like">Bypass this setting on liked tweets</label>
                 </div>
                 <div id="userlist"></div>
                 <input id="add-userlist" type="text" class="form-control" placeholder="@username">

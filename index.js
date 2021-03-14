@@ -37,7 +37,15 @@ if (store.get('theme') == undefined) {
 }
 
 if (store.get('medialist') == undefined) {
-    store.set('medialist', { uselist: false, userlist: {} });
+    store.set('medialist', { uselist: false, bypass_on_retweet: false, bypass_on_like: false, userlist: {} });
+}
+
+if (store.get('medialist.bypass_on_retweet') == undefined) {
+    store.set('medialist.bypass_on_retweet', false);
+}
+
+if (store.get('medialist.bypass_on_like') == undefined) {
+    store.set('medialist.bypass_on_like', false);
 }
 
 if (store.get('version') == undefined) {
@@ -151,13 +159,19 @@ const createWindow = () => {
             var this_tweet_author_username = users[this_tweet_author_id].screen_name;
             if (this_tweet_author_username === undefined) { this_tweet_author_username = 'unknown'; };
 
+            this_tweet_is_retweet = false;
             if (this_tweet.retweeted_status_id_str !== undefined) {
                 this_tweet_id = this_tweet.retweeted_status_id_str;
                 this_tweet_author_username = /RT @([a-zA-Z0-9_]{1,15}):[\s\S]*/gi.exec(this_tweet.full_text)[1];
+                this_tweet_is_retweet = true;
             }
 
+            this_tweet_is_liked = this_tweet.favorited !== undefined ? this_tweet.favorited : false;
+
             if (medialist.uselist) {
-                if (medialist.userlist[this_tweet_author_username.toLowerCase()] === undefined) continue;
+                if ((this_tweet_is_retweet && !medialist.bypass_on_retweet) || (this_tweet_is_liked && !medialist.bypass_on_like) || (!this_tweet_is_retweet && !this_tweet_is_liked) ) {
+                    if (medialist.userlist[this_tweet_author_username.toLowerCase()] === undefined) continue;
+                }
             }
 
             if (this_tweet.entities.media === undefined) continue;
@@ -381,6 +395,26 @@ const createWindow = () => {
             store.set('medialist.uselist', false);
         } else {
             store.set('medialist.uselist', true);
+        }
+    });
+
+    ipcMain.on('toggle-bypass_on_retweet', (event) => {
+        var now = store.get('medialist.bypass_on_retweet');
+
+        if (now) {
+            store.set('medialist.bypass_on_retweet', false);
+        } else {
+            store.set('medialist.bypass_on_retweet', true);
+        }
+    });
+
+    ipcMain.on('toggle-bypass_on_like', (event) => {
+        var now = store.get('medialist.bypass_on_like');
+
+        if (now) {
+            store.set('medialist.bypass_on_like', false);
+        } else {
+            store.set('medialist.bypass_on_like', true);
         }
     });
 
