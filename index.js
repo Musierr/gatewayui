@@ -1,12 +1,11 @@
 // Electron
-const { app, BrowserWindow, session, dialog, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
 const path = require('path');
 const util = require('util');
 
 // Express
 const express = require('express');
 const bodyParser = require('body-parser');
-const { url } = require('inspector');
 
 // Electron Store
 const Store = require('electron-store');
@@ -29,10 +28,23 @@ const isDev = require('electron-is-dev');
 const extension_dirname = !isDev ? `${process.resourcesPath}` : __dirname;
 
 // Prepare Save File
-if (store.get('version') == undefined || store.get('theme') == undefined || store.get('saves') == undefined || store.get('medialist') == undefined) {
+if (store.get('version') == undefined) {
     store.set('version', 0);
+}
+
+if (store.get('theme') == undefined) {
     store.set('theme', 'light');
+}
+
+if (store.get('medialist') == undefined) {
     store.set('medialist', { uselist: false, userlist: {} });
+}
+
+if (store.get('version') == undefined) {
+    store.set('version', 0);
+}
+
+if (store.get('saves') == undefined) {
     store.set('saves', {});
 }
 
