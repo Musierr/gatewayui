@@ -3,16 +3,9 @@ const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
 const path = require('path');
 const util = require('util');
 
-// Express
-const express = require('express');
-const bodyParser = require('body-parser');
-
 // Electron Store
 const Store = require('electron-store');
 const store = new Store({ name: 'saves' });
-
-// Merge json
-const merge = require("merge-json");
 
 // Filesystem
 const fs = require('fs');
@@ -53,7 +46,10 @@ if (store.get('version') == undefined) {
 }
 
 if (store.get('saves') == undefined) {
-    store.set('saves', {});
+    store.set('saves', {
+        tweets: {},
+        users: {},
+    });
 }
 
 // Array to object (Updated how the Userlist is stored)
@@ -73,53 +69,6 @@ const mediadir = path.join(app.getPath('userData'), 'media');
 
 // Create Mediadir if not exists
 if (!fs.existsSync(mediadir)) fs.mkdirSync(mediadir);
-
-// Server ------------------------------------------------------------------------------------------------
-
-const server = express();
-const router = express.Router();
-
-server.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
-server.use(bodyParser.json());
-
-server.get('/', (request, response) => {
-    response.send("This response was issued by gatewayui, please don't mess up with this port.");
-});
-
-server.post('/port', (request, response) => {
-
-    try {
-        var jsonparsed = JSON.parse(request.body.json).globalObjects;
-        var jsonstored = store.get('saves');
-
-        if (jsonparsed.tweets !== undefined && jsonstored.tweets !== undefined) {
-            for (var this_stored_key in jsonstored.tweets) {
-                if (jsonparsed.tweets[this_stored_key] !== undefined) delete jsonparsed.tweets[this_stored_key];
-            }
-        }
-
-        store.set('saves', merge.merge(jsonparsed, jsonstored));
-
-        var vcount = store.get('version');
-        vcount++;
-        store.set('version', vcount);
-
-        response.sendStatus(200);
-
-    } catch (e) {
-
-        console.log(request.body.json, e);
-
-        response.sendStatus(400);
-    }
-});
-
-server.use("/", router);
-
-const host = 'localhost';
-const port = 3727;
-
-server.listen(port, host, () => { });
 
 const createWindow = () => {
 
@@ -169,7 +118,7 @@ const createWindow = () => {
             this_tweet_is_liked = this_tweet.favorited !== undefined ? this_tweet.favorited : false;
 
             if (medialist.uselist) {
-                if ((this_tweet_is_retweet && !medialist.bypass_on_retweet) || (this_tweet_is_liked && !medialist.bypass_on_like) || (!this_tweet_is_retweet && !this_tweet_is_liked) ) {
+                if ((this_tweet_is_retweet && !medialist.bypass_on_retweet) || (this_tweet_is_liked && !medialist.bypass_on_like) || (!this_tweet_is_retweet && !this_tweet_is_liked)) {
                     if (medialist.userlist[this_tweet_author_username.toLowerCase()] === undefined) continue;
                 }
             }
@@ -271,23 +220,66 @@ const createWindow = () => {
     });
     mainWindow.loadURL('https://twitter.com');
 
-    mainWindow.webContents.session.loadExtension(path.join(extension_dirname, 'gatewayext')).then(({ id }) => {});
-
-    const mainWindowDevTools = new BrowserWindow({
-        show: false,
-        title: 'Gateway extension loader'
-    });
-    mainWindowDevTools.setMenuBarVisibility(false);
-    mainWindow.webContents.setDevToolsWebContents(mainWindowDevTools.webContents);
-
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
-        mainWindow.webContents.openDevTools({ mode: 'detach' });
     });
 
     mainWindow.on('close', function () {
         app.quit();
     });
+
+    try {
+        mainWindow.webContents.debugger.attach('1.3');
+    } catch (err) {
+        console.log('Debugger attach failed: ', err);
+    }
+
+    mainWindow.webContents.debugger.on('detach', (event, reason) => {
+        console.log('Debugger detached due to: ', reason);
+    });
+
+    mainWindow.webContents.debugger.on('message', (event, method, params) => {
+        if (method === 'Network.responseReceived') {
+            //console.log(params.response.url);
+            mainWindow.webContents.debugger.sendCommand('Network.getResponseBody', { requestId: params.requestId }).then(function (response) {
+                try {
+                    var jsonparsed = JSON.parse(response.body.toString()).data.user.result.timeline.timeline.instructions;
+                    var jsonstored = store.get('saves');
+
+                    for (instruction_index in jsonparsed) {
+                        var instruction = jsonparsed[instruction_index];
+                        if (instruction.type == 'TimelineAddEntries') {
+                            
+                            var entries = jsonparsed[instruction_index].entries;
+
+                            for (entry_index in entries) {
+                                var entry = entries[entry_index].content.itemContent.tweet;
+
+                                var id =  entry.rest_id;
+                                var content = entry.legacy;
+                                var user_id = entry.core.user.rest_id;
+                                var user = entry.core.user.legacy;
+
+                                jsonstored.tweets[id] = content;
+                                jsonstored.users[user_id] = user;
+
+                                store.set('saves', jsonstored);
+                            }
+                            
+                        } else {
+                            return;
+                        }
+                    }
+
+                    var vcount = store.get('version');
+                    vcount++;
+                    store.set('version', vcount);
+                } catch (e) {}
+            }).catch((error) => {});
+        }
+    });
+
+    mainWindow.webContents.debugger.sendCommand('Network.enable');
 
     // Controller Window ---------------------------------------------------------------------------------
 
